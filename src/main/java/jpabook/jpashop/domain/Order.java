@@ -6,20 +6,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Orders {
+@Table(name = "orders")
+public class Order {
+
     @Id @GeneratedValue
+    @Column(name = "order_id")
     private Long id;
-    @JoinColumn(name = "MEMBER_ID")
+
+    @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @OneToMany(mappedBy = "orders")
+    @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItem = new ArrayList<>();
 
     @OneToOne
-    @JoinColumn(name = "DELIVERY_ID")
+    @JoinColumn(name = "delivery_id")
     private Delivery delivery;
+
     private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
 }

@@ -9,9 +9,14 @@ import javax.persistence.*;
 @Getter @Setter
 public class Delivery {
     @Id @GeneratedValue
+    @Column(name = "delivery_id")
     private Long id;
-    @OneToOne
-    private Orders orders;
+
+    @OneToOne(mappedBy = "delivery")
+    private Order order;
     @Embedded
     private Address address;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus deliveryStatus;
 }
