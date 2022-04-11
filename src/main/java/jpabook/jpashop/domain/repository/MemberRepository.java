@@ -1,6 +1,7 @@
 package jpabook.jpashop.domain.repository;
 
 import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.domain.item.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +24,10 @@ public class MemberRepository {
 
     public List<Member> findAll() {
         return em.createQuery("select m from Member m").getResultList();
+    }
+
+    public Member findOne(Long memberId) {
+        return em.find(Member.class, memberId);
     }
 
     public List<Member> findByName(String name) {
