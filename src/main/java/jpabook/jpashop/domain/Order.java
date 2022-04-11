@@ -25,7 +25,7 @@ public class Order {
     private Member member;
 
     @OneToMany(mappedBy = "order", cascade = ALL)
-    private List<OrderItem> orderItem = new ArrayList<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "delivery_id")
@@ -42,7 +42,7 @@ public class Order {
     }
 
     public void addOrderItem(OrderItem orderItem) {
-        this.orderItem.add(orderItem);
+        this.orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
 
@@ -50,4 +50,45 @@ public class Order {
         this.delivery = delivery;
         delivery.setOrder(this);
     }
+
+    //==생성 메서드 ==//
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for (OrderItem orderItem : orderItems) {
+            order.addOrderItem(orderItem);
+        }
+        order.setOrderStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
+
+    //==주문 취소 ==//
+    /**
+     * 주무 취소
+     */
+    public void cancel() {
+        if (delivery.getDeliveryStatus() == DeliveryStatus.COMP) {
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능 합니다.");
+        }
+        
+        this.setOrderStatus(OrderStatus.CANCEL);
+        for (OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
+
+    //==조회 로직==//
+    /**
+     * 전체 주문 가격 조회
+     */
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for (OrderItem orderItem : orderItems) {
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
+
 }
