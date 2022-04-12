@@ -17,7 +17,17 @@ public class ItemService {
 
     @Transactional
     public void saveItem(Item item) {
+
+        //TODO ITEM 데이터 넣어주는거 만들기
         itemRepository.save(item);
+    }
+
+    @Transactional
+    public void updateItem(Long ItemId, String ItemName, int price, int stockQuantity) {
+        Item findItem = itemRepository.findOne(ItemId);
+        findItem.setName(ItemName);
+        findItem.setPrice(price);
+        findItem.setStockQuantity(stockQuantity);
     }
 
     public List<Item> findItems() {
