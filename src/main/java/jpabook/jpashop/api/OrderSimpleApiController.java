@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.OrderSimpleQueryDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,8 @@ public class OrderSimpleApiController {
         // N + 1 -> 1 + 회원 N(2) + 배송 N
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
 
-        List<SimpleOrderDto> collect = orders.stream()
-                .map(o -> new SimpleOrderDto(o))
+        List<OrderSimpleQueryDto> collect = orders.stream()
+                .map(o -> new OrderSimpleQueryDto(o))
                 .collect(Collectors.toList());
 
         return new Result(collect);
@@ -54,29 +55,24 @@ public class OrderSimpleApiController {
     public Result ordersV3() {
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
-        List<SimpleOrderDto> collect = orders.stream()
-                .map(o -> new SimpleOrderDto(o))
+        List<OrderSimpleQueryDto> collect = orders.stream()
+                .map(o -> new OrderSimpleQueryDto(o))
                 .collect(Collectors.toList());
 
         return new Result(collect);
     }
 
-    @Data
-    static class SimpleOrderDto {
-        private Long orderId;
-        private String name;
-        private LocalDateTime orderDate;
-        private OrderStatus orderStatus;
-        private Address address;
+    @GetMapping("/api/v3/simple-orders")
+    public Result ordersV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
-        public SimpleOrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName();
-            orderDate = order.getOrderDate();
-            orderStatus = order.getStatus();
-            address = order.getMember().getAddress();
-        }
+        List<OrderSimpleQueryDto> collect = orders.stream()
+                .map(o -> new OrderSimpleQueryDto(o))
+                .collect(Collectors.toList());
+
+        return new Result(collect);
     }
+
 
     @Data
     @AllArgsConstructor
