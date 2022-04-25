@@ -5,7 +5,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
-import jpabook.jpashop.repository.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.simplequery.OrderSimpleQueryRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
@@ -44,35 +45,55 @@ public class OrderSimpleApiController {
         // N + 1 -> 1 + 회원 N(2) + 배송 N
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
 
-        List<OrderSimpleQueryDto> collect = orders.stream()
-                .map(o -> new OrderSimpleQueryDto(o))
+        List<SimpleOrderDto> collect = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
                 .collect(Collectors.toList());
 
         return new Result(collect);
     }
 
+    /**
+     * 유연하고
+     * 성능 차이는 많이 나지 않는다.
+     * @return
+     */
     @GetMapping("/api/v3/simple-orders")
     public Result ordersV3() {
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
-        List<OrderSimpleQueryDto> collect = orders.stream()
-                .map(o -> new OrderSimpleQueryDto(o))
+        List<SimpleOrderDto> collect = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
                 .collect(Collectors.toList());
 
         return new Result(collect);
     }
 
-    @GetMapping("/api/v3/simple-orders")
-    public Result ordersV3() {
-        List<Order> orders = orderRepository.findAllWithMemberDelivery();
-
-        List<OrderSimpleQueryDto> collect = orders.stream()
-                .map(o -> new OrderSimpleQueryDto(o))
-                .collect(Collectors.toList());
-
-        return new Result(collect);
+    /**
+     * 너무 딱딱하고 유연하지 못하다.
+     * 성능에 큰 이점이 없다.
+     * @return
+     */
+    @GetMapping("/api/v4/simple-orders")
+    public Result ordersV4() {
+        return new Result(orderSimpleQueryRepository.findOrderDtos());
     }
 
+    @Data
+    public class SimpleOrderDto {
+        private Long orderId;
+        private String name;
+        private LocalDateTime orderDate;
+        private OrderStatus orderStatus;
+        private Address address;
+
+        public SimpleOrderDto(Order order) {
+            orderId = order.getId();
+            name = order.getMember().getName();
+            orderDate = order.getOrderDate();
+            orderStatus = order.getStatus();
+            address = order.getMember().getAddress();
+        }
+    }
 
     @Data
     @AllArgsConstructor
