@@ -5,11 +5,12 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
-import jpabook.jpashop.repository.simplequery.OrderSimpleQueryRepository;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -52,14 +53,11 @@ public class OrderSimpleApiController {
         return new Result(collect);
     }
 
-    /**
-     * 유연하고
-     * 성능 차이는 많이 나지 않는다.
-     * @return
-     */
+
     @GetMapping("/api/v3/simple-orders")
-    public Result ordersV3() {
-        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+    public Result ordersV3(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                           @RequestParam(value = "limit", defaultValue = "100") int limit) {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
 
         List<SimpleOrderDto> collect = orders.stream()
                 .map(o -> new SimpleOrderDto(o))
